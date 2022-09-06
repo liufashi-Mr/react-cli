@@ -11,3 +11,4 @@ import "./sass/index.scss";
 const result = count(2, 2);
 console.log(result);
 console.log(sum(1, 2, 3, 4));
+
