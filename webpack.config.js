@@ -4,7 +4,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const TerserWebpackPlugin = require("terser-webpack-plugin");
-const ImageMinimizerPlugin = require("image-minimizer-webpack-plugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
 // 需要通过 cross-env 定义环境变量
@@ -31,7 +30,7 @@ const getStyleLoaders = (preProcessor) => {
 module.exports = {
   entry: "./src/index.js",
   output: {
-    path: isProduction ? path.resolve(__dirname, "../dist") : undefined,
+    path: isProduction ? path.resolve(__dirname, "./dist") : undefined,
     filename: isProduction
       ? "static/js/[name].[contenthash:10].js"
       : "static/js/[name].js",
@@ -78,7 +77,7 @@ module.exports = {
           },
           {
             test: /\.(jsx|js)$/,
-            include: path.resolve(__dirname, "../src"),
+            include: path.resolve(__dirname, "./src"),
             loader: "babel-loader",
             options: {
               presets: ["react-app"],
@@ -97,16 +96,16 @@ module.exports = {
   plugins: [
     new ESLintWebpackPlugin({
       extensions: [".js", ".jsx"],
-      context: path.resolve(__dirname, "../src"),
+      context: path.resolve(__dirname, "./src"),
       exclude: "node_modules",
       cache: true,
       cacheLocation: path.resolve(
         __dirname,
-        "../node_modules/.cache/.eslintcache"
+        "./node_modules/.cache/.eslintcache"
       ),
     }),
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, "../public/index.html"),
+      template: path.resolve(__dirname, "./public/index.html"),
     }),
     isProduction &&
       new MiniCssExtractPlugin({
@@ -117,8 +116,8 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, "../public"),
-          to: path.resolve(__dirname, "../dist"),
+          from: path.resolve(__dirname, "./public"),
+          to: path.resolve(__dirname, "./dist"),
           toType: "dir",
           noErrorOnMissing: true, // 不生成错误
           globOptions: {
@@ -142,33 +141,33 @@ module.exports = {
       // 压缩js
       new TerserWebpackPlugin(),
       // 压缩图片
-      new ImageMinimizerPlugin({
-        minimizer: {
-          implementation: ImageMinimizerPlugin.imageminGenerate,
-          options: {
-            plugins: [
-              ["gifsicle", { interlaced: true }],
-              ["jpegtran", { progressive: true }],
-              ["optipng", { optimizationLevel: 5 }],
-              [
-                "svgo",
-                {
-                  plugins: [
-                    "preset-default",
-                    "prefixIds",
-                    {
-                      name: "sortAttrs",
-                      params: {
-                        xmlnsOrder: "alphabetical",
-                      },
-                    },
-                  ],
-                },
-              ],
-            ],
-          },
-        },
-      }),
+      // new ImageMinimizerPlugin({
+      //   minimizer: {
+      //     implementation: ImageMinimizerPlugin.imageminGenerate,
+      //     options: {
+      //       plugins: [
+      //         ["gifsicle", { interlaced: true }],
+      //         ["jpegtran", { progressive: true }],
+      //         ["optipng", { optimizationLevel: 5 }],
+      //         [
+      //           "svgo",
+      //           {
+      //             plugins: [
+      //               "preset-default",
+      //               "prefixIds",
+      //               {
+      //                 name: "sortAttrs",
+      //                 params: {
+      //                   xmlnsOrder: "alphabetical",
+      //                 },
+      //               },
+      //             ],
+      //           },
+      //         ],
+      //       ],
+      //     },
+      //   },
+      // }),
     ],
     // 代码分割配置
     splitChunks: {
@@ -201,6 +200,7 @@ module.exports = {
   devServer: {
     host: "localhost",
     port: 3000,
+    open: true,
     hot: true,
     compress: true,
     historyApiFallback: true,
