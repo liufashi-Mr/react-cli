@@ -16,7 +16,7 @@ const getStyleLoaders = (preProcessor, module = false) => {
     {
       loader: "css-loader",
       options: {
-        importLoaders: 1,
+        importLoaders: 2,
         modules: module
           ? { mode: "local", getLocalIdent: getCSSModuleLocalIdent }
           : {
