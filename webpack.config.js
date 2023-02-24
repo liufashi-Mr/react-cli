@@ -6,13 +6,24 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const TerserWebpackPlugin = require("terser-webpack-plugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
+const getCSSModuleLocalIdent = require("react-dev-utils/getCSSModuleLocalIdent");
 // 需要通过 cross-env 定义环境变量
 const isProduction = process.env.NODE_ENV === "production";
 
-const getStyleLoaders = (preProcessor) => {
+const getStyleLoaders = (preProcessor, module = false) => {
   return [
     isProduction ? MiniCssExtractPlugin.loader : "style-loader",
-    "css-loader",
+    {
+      loader: "css-loader",
+      options: {
+        importLoaders: 1,
+        modules: module
+          ? { mode: "local", getLocalIdent: getCSSModuleLocalIdent }
+          : {
+              mode: "icss",
+            },
+      },
+    },
     {
       loader: "postcss-loader",
       options: {
@@ -47,20 +58,34 @@ module.exports = {
           {
             // 用来匹配 .css 结尾的文件
             test: /\.css$/,
+            exclude: /\.module\.css$/,
             // use 数组里面 Loader 执行顺序是从右到左
             use: getStyleLoaders(),
+            sideEffects: true,
+          },
+          {
+            test: /\.module\.css$/,
+            use: getStyleLoaders(undefined, true),
           },
           {
             test: /\.less$/,
+            exclude: /\.module\.less$/,
             use: getStyleLoaders("less-loader"),
+            sideEffects: true,
+          },
+          {
+            test: /\.module\.less$/,
+            use: getStyleLoaders("less-loader", true),
           },
           {
             test: /\.s[ac]ss$/,
+            exclude: /\.module\..s[ac]ss$/,
             use: getStyleLoaders("sass-loader"),
+            sideEffects: true,
           },
           {
-            test: /\.styl$/,
-            use: getStyleLoaders("stylus-loader"),
+            test: /\.module\..s[ac]ss$/,
+            use: getStyleLoaders("sass-loader", true),
           },
           {
             test: /\.(png|jpe?g|gif|svg)$/,
