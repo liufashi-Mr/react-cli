@@ -10,19 +10,12 @@ const getCSSModuleLocalIdent = require("react-dev-utils/getCSSModuleLocalIdent")
 // 需要通过 cross-env 定义环境变量
 const isProduction = process.env.NODE_ENV === "production";
 
-const getStyleLoaders = (preProcessor, module = false) => {
+const getStyleLoaders = (cssOptions, preProcessor) => {
   return [
     isProduction ? MiniCssExtractPlugin.loader : "style-loader",
     {
       loader: "css-loader",
-      options: {
-        importLoaders: 2,
-        modules: module
-          ? { mode: "local", getLocalIdent: getCSSModuleLocalIdent }
-          : {
-              mode: "icss",
-            },
-      },
+      options: cssOptions,
     },
     {
       loader: "postcss-loader",
@@ -60,32 +53,77 @@ module.exports = {
             test: /\.css$/,
             exclude: /\.module\.css$/,
             // use 数组里面 Loader 执行顺序是从右到左
-            use: getStyleLoaders(),
+            use: getStyleLoaders({
+              importLoaders: 1,
+              modules: {
+                mode: "icss",
+              },
+            }),
             sideEffects: true,
           },
           {
             test: /\.module\.css$/,
-            use: getStyleLoaders(undefined, true),
+            use: getStyleLoaders({
+              importLoaders: 1,
+              modules: {
+                mode: "local",
+                getLocalIdent: getCSSModuleLocalIdent,
+              },
+            }),
           },
           {
             test: /\.less$/,
             exclude: /\.module\.less$/,
-            use: getStyleLoaders("less-loader"),
+            use: getStyleLoaders(
+              {
+                importLoaders: 3,
+                modules: {
+                  mode: "icss",
+                },
+              },
+              "less-loader"
+            ),
             sideEffects: true,
           },
           {
             test: /\.module\.less$/,
-            use: getStyleLoaders("less-loader", true),
+            use: getStyleLoaders(
+              {
+                importLoaders: 3,
+                modules: {
+                  mode: "local",
+                  getLocalIdent: getCSSModuleLocalIdent,
+                },
+              },
+              "less-loader"
+            ),
           },
           {
             test: /\.s[ac]ss$/,
-            exclude: /\.module\..s[ac]ss$/,
-            use: getStyleLoaders("sass-loader"),
+            exclude: /\.module\.s[ac]ss$/,
+            use: getStyleLoaders(
+              {
+                importLoaders: 3,
+                modules: {
+                  mode: "icss",
+                },
+              },
+              "sass-loader"
+            ),
             sideEffects: true,
           },
           {
-            test: /\.module\..s[ac]ss$/,
-            use: getStyleLoaders("sass-loader", true),
+            test: /\.module\.s[ac]ss$/,
+            use: getStyleLoaders(
+              {
+                importLoaders: 3,
+                modules: {
+                  mode: "local",
+                  getLocalIdent: getCSSModuleLocalIdent,
+                },
+              },
+              "sass-loader"
+            ),
           },
           {
             test: /\.(png|jpe?g|gif|svg)$/,
